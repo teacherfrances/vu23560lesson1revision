@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Find it online: revision</title>
+<style>
+:root{
+  --black:#141414; --bar:#1d1d1d; --addr:#3b3b3b;
+  --mid:#555; --grey:#7a7a7a; --line:#9a9a9a; --pale:#ececec; --pale2:#f5f5f5;
+  --or:#F5A20F; --or-tint:#FFF0D2; --or-deep:#8A5300; --red:#9b2c2c; --red-tint:#F7E7E7;
+  --disp:"Century Gothic","CenturyGothic","URW Gothic","URW Gothic L","AppleGothic","Avant Garde","Futura","Trebuchet MS",sans-serif;
+  --body:Calibri,Carlito,"Segoe UI",Candara,"Helvetica Neue",Arial,sans-serif;
+  --mono:Consolas,"Lucida Console","DejaVu Sans Mono","Courier New",monospace;
+}
+body{--pc:#F5A20F;--pc-ink:#141414;--pc-tint:#FFF0D2}
+body.g0{--pc:#F5A20F;--pc-ink:#141414;--pc-tint:#FFF0D2}
+body.g1{--pc:#141414;--pc-ink:#F5A20F;--pc-tint:#EFEFEF}
+body.g2{--pc:#6B6B6B;--pc-ink:#ffffff;--pc-tint:#EBEBEB}
+*{box-sizing:border-box}
+html{font-size:28px;height:100%}
+body{margin:0;height:100%;height:100dvh;display:flex;flex-direction:column;overflow:hidden;
+  font-family:var(--body);color:var(--black);background:#fff;line-height:1.3;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:4px solid var(--or);outline-offset:2px;box-shadow:0 0 0 7px var(--black)}
+.disp{font-family:var(--disp);font-weight:700}
+
+/* top bar */
+.top{background:var(--bar);color:#fff;display:flex;align-items:center;gap:.3rem;padding:.25rem .4rem;flex:none}
+.dots{display:flex;gap:.2rem;flex:none}
+.dots i{display:block;width:.36rem;height:.36rem;border-radius:50%;background:#9a9a9a}
+.dots i:first-child{background:var(--or)}
+.addr{flex:1;min-width:0;background:var(--addr);border-radius:999px;padding:.2rem .7rem;font-size:.7rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tb{background:#fff;color:#111;border:0;border-radius:4px;font-weight:700;font-size:.75rem;min-height:44px;min-width:44px;padding:0 .4rem;flex:none}
+.saved{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + min(5rem,150px));right:.5rem;background:var(--or);color:var(--black);font-weight:700;font-size:.7rem;padding:.1rem .6rem;border:2px solid var(--black);border-radius:999px;opacity:0;transition:opacity .3s;z-index:90;pointer-events:none}
+.saved.on{opacity:1}
+.prog{height:.4rem;background:#fff;flex:none;display:flex;gap:2px;padding:2px 2px 0}
+.prog i{display:block;flex:1;height:100%;opacity:.25}
+.prog i.on{opacity:1}
+
+main{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:.5rem .6rem 1.2rem;position:relative}
+.wrap{max-width:900px;margin:0 auto;overflow-wrap:anywhere;word-break:normal}
+.taskbox .tt,.taskbox .tf,.q,.opt .tx,.showtxt,.mist div,.lede{overflow-wrap:anywhere}
+
+/* bottom bar */
+.foot{flex:none;border-top:6px solid var(--pc);background:#fff;padding:.3rem .4rem;display:flex;flex-wrap:wrap;gap:.3rem;align-items:center}
+.foot{font-size:min(.9rem,30px)}
+.foot .bb{padding:.15em .4em}
+.foot .bb{flex:1;white-space:nowrap}
+.bb{border:3px solid var(--black);background:#fff;font-weight:700;min-height:2.1em;padding:.15em .7em;border-radius:4px;text-align:center}
+.bb.go{background:var(--or);color:var(--black)}
+.bb.solid{background:var(--black);color:#fff}
+.bb.wait{background:#fff;border-style:dashed;border-color:var(--or-deep);color:var(--or-deep)}
+.bb[disabled]{opacity:.35;cursor:default}
+.foot .bb.menub{flex:0 0 auto}
+.bb.skip{flex-basis:100%;background:var(--pale);font-weight:400}
+.pill{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + min(3.6rem,120px));font-size:min(.75rem,24px);white-space:nowrap;z-index:40;background:var(--black);color:#fff;border:3px solid var(--or);border-radius:999px;font-weight:700;padding:.2em .9em;min-height:44px;max-width:94vw;box-shadow:0 4px 0 rgba(0,0,0,.25)}
+
+/* docx-look pieces */
+.sbar{display:flex;align-items:stretch;margin:.2em 0 .5em}
+.sbar .blk{background:var(--pc);color:var(--pc-ink);font-family:var(--disp);font-weight:700;min-width:1.9em;display:flex;align-items:center;justify-content:center;font-size:1.1em;padding:0 .25em}
+.sbar .ttl{flex:1;background:var(--pc-tint);border:3px solid var(--black);border-left:0;padding:.25em .6em;font-family:var(--disp);font-weight:700}
+.lede{color:var(--mid);margin:.1em 0 .5em}
+.live{border:3px solid var(--black);background:var(--pale2);padding:.3em .6em;margin:.4em 0 .6em}
+.live.small{font-size:.72em;padding:.2em .5em;margin:.2em 0 .4em}
+.live .bar{height:.4em;background:#fff;border:2px solid var(--black);margin-top:.3em}
+.live .bar i{display:block;height:100%;background:var(--or)}
+.note{display:flex;background:var(--pale2);margin:.6em 0}
+.note .badge{width:1.7em;flex:none;background:#555;color:#fff;display:flex;justify-content:center;padding-top:.3em;font-weight:700}
+.note.ok .badge{background:var(--black);color:var(--or)}
+.note.warn .badge{background:var(--red)}
+.note .nb{padding:.4em .7em;flex:1;min-width:0}
+.note p{margin:.15em 0}
+.hl{background:var(--or-tint);border-bottom:3px solid var(--or);padding:0 .15em;font-weight:700}
+.muted{color:var(--mid)}
+.center{text-align:center}
+.row{display:flex;flex-wrap:wrap;gap:.4em;align-items:center}
+.grouphead{font-family:var(--disp);font-weight:700;margin:1em 0 .4em;display:flex;align-items:center;gap:.4em}
+.grouphead .sw{width:1em;height:1em;border:3px solid var(--black);flex:none}
+
+/* menu tiles */
+.hero{border:3px solid var(--black);border-bottom:10px solid var(--or);margin:.3em 0 .6em}
+.hero .hbar{background:var(--bar);color:#fff;padding:.25em .6em;font-size:.75em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hero .panel{background:var(--or-tint);border-left:12px solid var(--or);margin:.6em;padding:.6em .8em}
+.eyebrow{font-family:var(--disp);font-weight:700;font-size:.75em}
+.big{font-family:var(--disp);font-weight:700;font-size:1.6em;line-height:1.1;margin:.15em 0}
+.mtile{display:flex;align-items:stretch;width:100%;text-align:left;border:3px solid var(--black);border-bottom-width:7px;background:#fff;padding:0;margin:.4em 0}
+.mtile .l{font-family:var(--disp);font-weight:700;width:1.9em;flex:none;display:flex;align-items:center;justify-content:center;font-size:1.1em}
+.mtile .t{padding:.35em .6em;flex:1;min-width:0}
+.mtile .t b{display:block}
+.mtile .d{display:block;color:var(--mid)}
+.mtile .sc{display:inline-block;margin-top:.25em;border:2px solid var(--black);border-radius:999px;padding:0 .5em;font-weight:700}
+.mtile .sc.done{background:var(--or)}
+.welcome{border:3px solid var(--black);background:var(--or);padding:.5em .7em;margin:.5em 0}
+
+/* item cards */
+.card{border:3px solid var(--black);border-bottom:8px solid var(--pc);background:#fff;padding:.6em .7em;margin:.7em 0;border-left-width:3px}
+.card.ok{border-left:12px solid var(--or)}
+.card.no{border-left:12px solid var(--red)}
+.card.flash{animation:flash 1s}
+@keyframes flash{25%{background:var(--or-tint)}75%{background:var(--or-tint)}}
+.chead{display:flex;align-items:center;gap:.4em;margin-bottom:.3em;flex-wrap:wrap}
+.num{background:var(--pc);color:var(--pc-ink);font-weight:700;min-width:1.6em;min-height:1.6em;display:flex;align-items:center;justify-content:center}
+.tag{border:2px solid var(--tagc,#8A5300);color:var(--tagc,#8A5300);padding:0 .45em;font-weight:700;font-size:.85em;border-radius:3px}
+.q{font-weight:700;margin:.3em 0 .55em;background:var(--pc-tint);border-left:8px solid var(--pc);padding:.45em .6em}
+.stress{background:var(--pc-tint);border-left:8px solid var(--pc);padding:.2em .4em}
+.showtxt{border:3px solid var(--black);background:var(--pale2);padding:.4em .6em;margin:.3em 0 .5em;font-family:var(--mono);white-space:pre-line;overflow-wrap:anywhere}
+.opt{display:flex;gap:.5em;align-items:center;width:100%;text-align:left;border:3px solid var(--black);background:#fff;min-height:2.1em;padding:.3em .6em;margin:.35em 0;border-radius:4px}
+.opt .tx{min-width:0;overflow-wrap:anywhere}
+.opt .ol{flex:none;min-width:1.5em;height:1.5em;display:inline-flex;align-items:center;justify-content:center;background:var(--pc-tint);border:2px solid var(--pc);color:var(--black);font-weight:700;border-radius:4px}
+.opt.right .ol{background:var(--or);border-color:var(--or)}
+.opt{padding-left:.4em}
+.opt .mk{margin-left:auto;font-weight:700;flex:none}
+.q,.fb,.mist div{overflow-wrap:anywhere}
+.opt.right{background:var(--black);color:#fff}
+.opt.right .mk{color:var(--or)}
+.opt.wrong{background:repeating-linear-gradient(45deg,#e8e8e8 0 8px,#cdcdcd 8px 16px)}
+.opt.wrong .tx{text-decoration:line-through}
+.opt.dim{opacity:.45}
+.fb{margin:.4em 0 .2em;padding:.4em .6em;border:3px solid var(--black);background:var(--pale2)}
+.fb.good{background:var(--or-tint)}
+.fb b{display:block}
+.chg{border:2px solid var(--black);background:#fff;border-radius:999px;min-height:44px;padding:0 .8em;font-weight:700;margin-top:.3em}
+.say{border:2px solid var(--black);background:#fff;border-radius:999px;min-height:44px;padding:0 .8em;font-weight:700}
+.stress{font-family:var(--disp);font-weight:700;font-size:min(1.5em,10vw);text-align:center;margin:.2em 0}
+.summary{border:3px solid var(--black);border-bottom:8px solid var(--pc);background:var(--pc-tint);padding:.6em .7em;margin:1em 0}
+.mchip{border:2px solid var(--black);background:#fff;border-radius:999px;min-height:44px;padding:0 .7em;margin:.15em;font-weight:700}
+
+/* ===== simulation ===== */
+.taskbox{position:sticky;top:-.5rem;z-index:20;background:#fff;border:3px solid var(--black);border-bottom:8px solid var(--or);padding:.4em .6em;margin:.3em 0 .5em;box-shadow:0 6px 0 #fff}
+.taskbox{font-size:.9em;background:var(--pc-tint);border-color:var(--black)}
+.taskbox .tt::before{content:"\1F449  "}
+.taskbox .tf{background:#fff}
+@media (max-height:700px){ .taskbox{position:static;box-shadow:none} }
+.taskbox .tn{font-size:.8em;color:var(--mid);font-weight:700}
+.taskbox .tt{font-weight:700;font-size:1.05em}
+.taskbox .tf{font-size:.85em;margin-bottom:.25em;padding:.2em .4em}
+.taskbox .tf.good{background:var(--or-tint);border-left:6px solid var(--or)}
+.taskbox .tf.bad{background:var(--red-tint);border-left:6px solid var(--red)}
+.sim{font-size:.62em;border:3px solid var(--black);border-bottom:10px solid var(--pc);background:#fff;overflow:hidden;line-height:1.25;user-select:none;-webkit-user-select:none}
+.hit{font:inherit;color:inherit;min-height:44px;min-width:44px;border:0;background:transparent;display:inline-flex;align-items:center;justify-content:center;padding:.2em .5em;border-radius:6px;text-align:left;-webkit-tap-highlight-color:transparent}
+.sim .hit{scroll-margin-top:9rem;scroll-margin-bottom:2rem}
+.hit.okf{animation:okf .7s}
+.hit.nof{animation:nof .6s}
+@keyframes okf{0%,60%{background:var(--or);color:var(--black);box-shadow:0 0 0 3px var(--black)}}
+@keyframes nof{0%,20%,60%{transform:translateX(-4px);background:#d3d3d3}40%,80%{transform:translateX(4px)}}
+.hit.done{box-shadow:inset 0 0 0 3px var(--or)}
+
+/* desktop */
+.desk{color:#fff;background:#2c3a4d}
+.wall{background:radial-gradient(ellipse at 75% 20%,#5d7690 0%,#3b4d63 45%,#25303e 100%);padding:.8em .5em 1.2em;min-height:22em}
+.icons{display:grid;grid-template-columns:repeat(auto-fill,minmax(5.6em,1fr));gap:.9em .2em}
+.icons .hit{flex-direction:column;justify-content:flex-start;padding:.35em .2em;color:#fff;border-radius:10px}
+.icons .hit:active{background:rgba(255,255,255,.18)}
+.icons .hit.done{background:rgba(245,162,15,.22);box-shadow:inset 0 0 0 3px var(--or)}
+.ic{width:4.6em;height:4.6em;border-radius:20%;background:#ffffff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 8px rgba(0,0,0,.45)}
+.ic svg{width:76%;height:76%}
+.icl{font-size:1.05em;font-weight:700;margin-top:.35em;text-align:center;min-height:1.3em;color:#fff;text-shadow:0 1px 3px #000}
+.taskbar{display:flex;align-items:center;gap:.6em;background:rgba(20,24,32,.96);padding:.35em .6em;color:#e6e9f2;border-top:1px solid #4a5568}
+.startb{display:inline-flex;width:2.2em;height:2.2em;align-items:center;justify-content:center;background:#3b4658;border-radius:6px}
+.startb svg{width:1.2em;height:1.2em}
+.tsearch{flex:1;background:#3b4658;border-radius:999px;padding:.35em .8em;color:#c9cede;white-space:nowrap;overflow:hidden}
+.clock{display:flex;flex-direction:column;align-items:flex-end;font-size:.85em;line-height:1.15;white-space:nowrap}
+/* browser chrome */
+.chrome{background:#e4e6eb}
+.tabs{display:flex;align-items:flex-end;gap:.2em;padding:.35em .35em 0;min-width:0}
+.tabw{display:flex;align-items:center;background:#d2d6de;border-radius:8px 8px 0 0;min-width:0;flex:0 1 auto}
+.tabw.on{background:#fff}
+.tabw .hit.tabt{justify-content:flex-start;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;max-width:11em;display:block;line-height:44px;padding:0 .4em}
+.tabw .hit.tabx{min-width:40px;padding:0}
+.tool{display:flex;align-items:center;gap:.1em;padding:.15em .25em .25em;background:#fff;border-bottom:2px solid #d6d9e0}
+.tool .hit{padding:0 .3em;font-size:1.15em}
+.tool .hit.addr{flex:1;min-width:0;justify-content:flex-start;background:#eef0f4;border-radius:999px;font-size:1em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;line-height:44px;padding:0 .7em}
+.tool .fwd{color:#9aa0ab}
+.page{display:flex;min-height:15em;position:relative}
+.pcont{flex:1;min-width:0}
+.scol{width:30px;flex:none;background:#f1f2f5;border-left:2px solid #dcdfe5;display:flex}
+.scol .hit{width:100%;min-width:30px;padding:0;align-items:flex-start;border-radius:0}
+.thumb{display:block;width:12px;height:3.5em;background:#8d929c;border-radius:6px;margin:.4em auto 0}
+.thumb.low{margin-top:6em}
+.phead{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.3em;padding:.4em .5em}
+.logo{font-family:var(--disp);font-weight:700;font-size:1.25em}
+.logo i{display:inline-flex;width:1.5em;height:1.5em;border-radius:50%;background:#3a3a3a;color:#fff;font-style:normal;align-items:center;justify-content:center;margin-right:.25em;font-size:.9em}
+.sbox{border:2px solid #b9bdc6;border-radius:999px;color:#666;background:#fff;padding:0 .7em}
+.nav{background:#1b1b1b;display:flex;flex-wrap:wrap;padding:0 .2em}
+.nav .hit{color:#fff;font-family:var(--disp);font-weight:700;padding:0 .5em}
+.herop{background:#e6e6e6;padding:.7em .7em .8em;position:relative}
+.herop h3{margin:0 0 .2em;font-family:var(--disp);font-size:1.35em}
+.findbtn{background:#3d3d3d!important;color:#fff!important;border-radius:999px!important;font-family:var(--disp);font-weight:700;padding:0 1em!important;margin-top:.4em}
+.cursor{position:absolute;right:16%;top:1.6em;font-size:1.6em;min-width:44px;min-height:44px}
+.cards{display:flex;flex-wrap:wrap;gap:.4em;padding:.6em}
+.cards .hit{border:2px solid #d0d3da;border-radius:6px;flex:1 1 8em;flex-direction:column;align-items:flex-start;padding:.4em .5em}
+.cards b{font-family:var(--disp)}
+.drop{margin:0 .6em .2em 3.5em;border:2px solid #d0d3da;background:#fff;display:flex;flex-direction:column;box-shadow:0 4px 0 rgba(0,0,0,.08)}
+.drop .hit{justify-content:space-between;border-radius:0;border-bottom:1px solid #eee;width:100%}
+.drop .hit.open{background:#e9e9e9}
+.drop.two{margin-left:5.5em}
+.pbody{padding:.6em .7em}
+.pbody h3{font-family:var(--disp);margin:.1em 0 .4em;font-size:1.3em}
+.pbody p{margin:.3em 0}
+.fade{color:#aaa}
+.blank{padding:2.5em 1em;text-align:center;color:var(--mid)}
+.keys{display:flex;flex-wrap:wrap;gap:.35em;padding:.6em;background:#d9dce2}
+.keys .hit{background:#fff;border:2px solid #9aa0ab;border-radius:6px;font-family:var(--mono);font-weight:700;font-size:1.15em;padding:0 .6em;box-shadow:0 3px 0 #9aa0ab}
+.keys .hit.enter{background:var(--black);color:#fff;font-family:var(--body)}
+.serp{padding:.4em .7em}
+.serp .slogo{font-family:var(--disp);font-weight:700;font-size:1.3em;margin-right:.4em}
+.stabs{display:flex;flex-wrap:wrap;border-bottom:2px solid #dcdfe5;padding:0 .4em}
+.stabs .hit{color:#555;font-family:var(--disp);font-weight:700}
+.stabs .hit.cur{color:#111;box-shadow:inset 0 -4px 0 #111;border-radius:0}
+.res{padding:.35em .5em .5em}
+.res .hit{display:flex;justify-content:flex-start;padding:0 .3em;min-height:40px}
+.res .rurl{color:#5b6070}
+.res .rt{font-family:var(--disp);font-weight:700;font-size:1.1em;color:#1a4fb5;text-decoration:underline;text-decoration-thickness:1px}
+.res .rd{padding:0 .3em;color:#333}
+.spons{font-weight:700;color:#111}
+.loading{padding:3em 1em;text-align:center;font-weight:700}
+
+/* static page in read part */
+.spage{font-size:.8em;border:3px solid var(--black);border-bottom:8px solid var(--pc);margin:.6em 0;background:#fff}
+.spage .sbarr{background:#e4e6eb;padding:.3em .5em}
+.spage .surl{background:#fff;border-radius:999px;padding:.15em .7em;overflow-wrap:anywhere}
+.spage .sc{padding:.6em .8em}
+.spage h3{font-family:var(--disp);margin:.1em 0 .3em}
+.spage p{margin:.3em 0}
+.spage .snav{background:#1b1b1b;color:#fff;padding:.3em .6em;font-family:var(--disp);font-weight:700}
+
+/* results */
+.score{font-family:var(--disp);font-weight:700;font-size:2.2em;text-align:center}
+.stars{text-align:center;font-size:1.6em;letter-spacing:.1em}
+.rrow{display:flex;align-items:center;width:100%;border:3px solid var(--black);background:#fff;padding:0;margin:.3em 0;text-align:left;min-height:2em}
+.rrow .l{width:1.8em;align-self:stretch;display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-weight:700;flex:none}
+.rrow .t{flex:1;padding:.2em .5em;min-width:0}
+.rrow .s{padding:0 .5em;font-weight:700;flex:none}
+.mist .you{text-decoration:line-through;color:var(--mid)}
+.mist .right{font-weight:700}
+
+@media (min-width:700px){ main{padding:.8rem 1rem 1.4rem} }
+@media (prefers-reduced-motion:reduce){ *{animation:none!important;transition:none!important} }
+</style>
+</head>
+<body class="g0">
+<div class="top">
+  <div class="dots" aria-hidden="true"><i></i><i></i><i></i></div>
+  <div class="addr" id="addr">&#128274; vu23560 &rsaquo; revision</div>
+  <button class="tb" id="bSmall" aria-label="Smaller text">A&minus;</button>
+  <button class="tb" id="bBig" aria-label="Bigger text">A+</button>
+  <button class="tb" id="bMenu" aria-label="Menu">&#9776;</button>
+</div>
+<div class="prog" id="prog" aria-hidden="true"></div>
+<main id="main"><div class="wrap" id="wrap"></div></main>
+<div class="foot" id="foot"></div>
+<div class="saved" id="saved">&#10003; Saved</div>
+<div id="pillRoot"></div>
+
+<script>
+(function(){
+"use strict";
+var KEY = "vu23560_pl1_find_it_online_revision_v1";
+var SIZES = [24, 28, 34, 40], SIZE_NAMES = ["Normal", "Large", "Larger", "Largest"];
+var REDUCED = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+var storeOK = false, FLASH = null, blocked = 0, LOADT = null;
+
+function h(t, a, c){
+  var e = document.createElement(t), k;
+  if(a){ for(k in a){ if(!a.hasOwnProperty(k) || a[k] == null) continue;
+    if(k === "cls") e.className = a[k];
+    else if(k.indexOf("on") === 0) e.addEventListener(k.slice(2), a[k]);
+    else e.setAttribute(k, a[k]); } }
+  if(c != null){ if(!(c instanceof Array)) c = [c];
+    for(var i = 0; i < c.length; i++){ var x = c[i]; if(x == null || x === false) continue;
+      e.appendChild(typeof x === "string" || typeof x === "number" ? document.createTextNode(String(x)) : x); } }
+  return e;
+}
+function shuffle(a){ a = a.slice(); for(var i = a.length - 1; i > 0; i--){ var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+function range(n){ var a = []; for(var i = 0; i < n; i++) a.push(i); return a; }
+function note(kind, sym, kids){ return h("div", {cls:"note " + (kind || "")}, [h("div", {cls:"badge"}, sym), h("div", {cls:"nb"}, kids)]); }
+
+/* speech for word stress */
+var VOICE = null;
+function pickVoice(){ if(!window.speechSynthesis) return; var vs = speechSynthesis.getVoices(), pref = ["en-AU", "en-GB", "en-NZ", "en-US", "en"];
+  for(var p = 0; p < pref.length; p++) for(var i = 0; i < vs.length; i++) if(vs[i].lang && vs[i].lang.replace("_", "-").indexOf(pref[p]) === 0){ VOICE = vs[i]; return; } }
+if(window.speechSynthesis){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+function say(t){ if(!window.speechSynthesis) return; try{ speechSynthesis.cancel(); var u = new SpeechSynthesisUtterance(t); if(VOICE) u.voice = VOICE; u.lang = VOICE ? VOICE.lang : "en-AU"; u.rate = 0.8; speechSynthesis.speak(u); }catch(e){} }
+
+/* ===================== CONTENT ===================== */
+var ICONS = [
+  {id:"folder", name:"Files", svg:'<path d="M5 13a3 3 0 0 1 3-3h10l4 4h18a3 3 0 0 1 3 3v19a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3z" fill="#e2e2e2"/><path d="M5 19h38"/>'},
+  {id:"mail", name:"Mail", svg:'<rect x="5" y="11" width="38" height="27" rx="3" fill="#e2e2e2"/><path d="M6 13l18 14 18-14"/>'},
+  {id:"browser", name:"Browser", svg:'<circle cx="24" cy="24" r="18" fill="#e2e2e2"/><ellipse cx="24" cy="24" rx="7.5" ry="18"/><path d="M6 24h36M9 15h30M9 33h30"/>'},
+  {id:"doc", name:"Document", svg:'<path d="M12 5h17l9 9v29H12z" fill="#e2e2e2"/><path d="M29 5v9h9M17 22h15M17 28h15M17 34h10"/>'},
+  {id:"camera", name:"Camera", svg:'<path d="M5 17a3 3 0 0 1 3-3h7l3-5h12l3 5h7a3 3 0 0 1 3 3v19a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3z" fill="#e2e2e2"/><circle cx="24" cy="26" r="8" fill="#fff"/>'},
+  {id:"sheet", name:"Tables", svg:'<rect x="6" y="8" width="36" height="32" rx="2" fill="#fff"/><path d="M6 16h36M6 24h36M6 32h36M18 8v32M30 8v32"/><rect x="6" y="8" width="36" height="8" fill="#cfcfcf"/>'},
+  {id:"game", name:"Games", svg:'<path d="M14 15h20a10 10 0 0 1 9 14l-3 7a4 4 0 0 1-7 1l-3-5H18l-3 5a4 4 0 0 1-7-1l-3-7a10 10 0 0 1 9-14z" fill="#e2e2e2"/><path d="M15 21v8M11 25h8"/><circle cx="31" cy="23" r="1.5" fill="#1f1f1f"/><circle cx="35" cy="27" r="1.5" fill="#1f1f1f"/>'},
+  {id:"calc", name:"Calculator", svg:'<rect x="10" y="4" width="28" height="40" rx="3" fill="#e2e2e2"/><rect x="14" y="8" width="20" height="9" fill="#fff"/><path d="M16 24h2M23 24h2M30 24h2M16 31h2M23 31h2M30 31h2M16 38h2M23 38h2M30 38h2" stroke-width="4"/>'},
+  {id:"settings", name:"Settings", svg:'<path d="M21 4h6l1 5 4 2 4-3 4 4-3 4 2 4 5 1v6l-5 1-2 4 3 4-4 4-4-3-4 2-1 5h-6l-1-5-4-2-4 3-4-4 3-4-2-4-5-1v-6l5-1 2-4-3-4 4-4 4 3 4-2z" fill="#e2e2e2"/><circle cx="24" cy="24" r="6" fill="#fff"/>'},
+  {id:"printer", name:"Printer", svg:'<rect x="13" y="5" width="22" height="11" fill="#fff"/><rect x="5" y="16" width="38" height="17" rx="3" fill="#e2e2e2"/><rect x="13" y="27" width="22" height="16" fill="#fff"/><path d="M17 33h14M17 38h10"/><circle cx="37" cy="21" r="1.5" fill="#1f1f1f"/>'}
+];
+var ICONLABEL = {folder:"the folder icon", mail:"the mail icon", browser:"the browser icon", doc:"the document icon", camera:"the camera icon",
+  sheet:"the table icon", game:"the game icon", calc:"the calculator icon", settings:"the settings icon", printer:"the printer icon"};
+
+var PARTS = [
+  {id:"A", grp:0, title:"The desktop", desc:"Find the right icon on the screen.", type:"sim", sim:"desktop", shuffleTasks:true, tasks:[
+    {t:"You want to find a saved file.", target:"folder", why:"The folder keeps your saved files."},
+    {t:"You want to add up your bills.", target:"calc", why:"The calculator adds up numbers."},
+    {t:"You want to read your emails.", target:"mail", why:"The mail app opens your emails."},
+    {t:"You want to put a page on paper.", target:"printer", why:"The printer puts the page on paper."},
+    {t:"You want to take a photo.", target:"camera", why:"The camera takes photos."},
+    {t:"You want to make a table of prices.", target:"sheet", why:"The table app makes tables with rows and columns."},
+    {t:"You want to write a letter.", target:"doc", why:"The document app is for letters and other documents."},
+    {t:"You want to make the screen brighter.", target:"settings", why:"Settings change the screen and the sound."},
+    {t:"You want to open a website.", target:"browser", why:"The browser opens websites."}]},
+  {id:"B", grp:0, title:"The parts of a browser", desc:"Find each part of the browser.", type:"sim", sim:"browser", shuffleTasks:true, tasks:[
+    {t:"Find the menu bar.", target:"menu", why:"The menu bar is under the logo. It has Home, About us and Classes."},
+    {t:"Find the refresh button.", target:"refresh", why:"The refresh button loads the page again."},
+    {t:"Find a button.", target:"find", why:"Find a class is a button. You click on it."},
+    {t:"Find the x to close a tab.", target:["x1", "x2"], why:"The x is on the tab. It closes the tab."},
+    {t:"Find the address bar.", target:"addr", why:"The address bar shows the web address."},
+    {t:"Find the scroll bar.", target:"scroll", why:"The scroll bar is on the right. It moves the page up and down."},
+    {t:"Find the plus to open a new tab.", target:"plus", why:"The plus opens a new tab."},
+    {t:"Find the search box for this site.", target:"search", why:"The search box is at the top, on the right. It searches this website."},
+    {t:"Find the cursor.", target:"cursor", why:"The cursor shows where the mouse is."},
+    {t:"Find the tab you can see now.", target:"tab1", why:"The Cove Hub tab is white. You can see this page now."},
+    {t:"Find the logo.", target:"logo", why:"The logo is at the top, on the left. Click on it to go home."},
+    {t:"Find the back arrow.", target:"back", why:"The back arrow takes you to the page before."}]},
+  {id:"C", grp:0, title:"Search results", desc:"Find the ad, the web address and the right website.", type:"sim", sim:"search", tasks:[
+    {t:"Find the ad. Tap the word that tells you it is an ad.", target:"sponsored", why:"Sponsored means it is an ad. Skip it."},
+    {t:"You want pictures. Look under the search bar. Tap the right word.", target:"images", why:"Images shows pictures."},
+    {t:"Find the news story about a garden. Tap its blue title.", target:"newst", why:"New garden opens at Waverton hub is a news story."},
+    {t:"Find the web address of The Cove Hub. It is the grey words above the blue title.", target:"coveurl", why:"www.thecovehub.org.au is the web address."},
+    {t:"Skip the ad. Open The Cove Hub website. Tap its blue title.", target:"covet", why:"You skip the ad. You click on the right title."}]},
+  {id:"D", grp:0, title:"Menus and dropdown menus", desc:"Use the menu. Find a page. Go home. Close it.", type:"sim", sim:"menus", tasks:[
+    {t:"Open Community life in the menu.", target:"cl", why:"A dropdown menu opens under Community life."},
+    {t:"A list opens. Tap Library corner.", target:"lc", why:"A second list opens on the right."},
+    {t:"Tap Digital help sessions.", target:"dig", why:"The Digital help sessions page opens."},
+    {t:"You want the times. Scroll down. Tap the scroll bar.", target:"scroll", why:"The page moves down. Now you can see the times."},
+    {t:"Go back to the home page.", target:["logo", "home", "back"], why:"The logo takes you home. The back arrow and Home work too."},
+    {t:"Close the website. Tap the x on the tab.", target:"x1", why:"The x closes the tab and the website."}]},
+  {id:"E", grp:0, title:"Solo run: open a website", desc:"Open the browser. Type an address. Find a page.", type:"sim", sim:"solo", tasks:[
+    {t:"Open the browser.", target:"browser", why:"The browser opens. It shows a new tab."},
+    {t:"Tap the address bar.", target:"addr", why:"Now you can type the web address."},
+    {t:"Type the address: www.cammeraygreenpool.com.au. Tap the parts in order.", type:"type", seq:["www", ".", "cammeraygreenpool", ".", "com", ".", "au"], why:"The address is right. Dots go between the parts."},
+    {t:"The address is ready. Open the page.", target:"enter", why:"Enter opens the website."},
+    {t:"You want adult lessons. Tap the right word in the menu.", target:"lessons", why:"The Lessons page has the adult lessons."},
+    {t:"Go back to the page before.", target:"back", why:"The back arrow takes you to the page before."},
+    {t:"Close the website.", target:"x1", why:"The x on the tab closes the website."}]},
+  {id:"F", grp:0, title:"Read the web pages", desc:"Read two web pages. Choose the answer.", type:"q", items:[
+    {k:"page", page:"help"},
+    {q:"How long is one session?", opts:["30 minutes", "One hour", "Two hours"], why:"The page says: Each session is 30 minutes."},
+    {q:"How much does a session cost?", opts:["Nothing. It is free.", "$10", "$30"], why:"The page says: Sessions are free."},
+    {q:"How can you book?", opts:["Call or ask at the front desk.", "Send an email.", "Only on the website."], why:"Call 9955 0000 or ask at the front desk. You can't book by email."},
+    {q:"What do you need to bring?", opts:["Nothing. You can bring your own device.", "A laptop.", "A library card and a phone."], why:"Bring your own device, or use one of the six laptops."},
+    {q:"Which is NOT in Library corner?", opts:["A cafe", "A quiet study room", "A photocopier"], why:"Library corner has books, a quiet study room and a photocopier. There is no cafe."},
+    {q:"What is the web address of this page?", opts:["www.thecovehub.org.au/library-corner/digital-help", "www.thecovehub.com.au/digital-help", "www.librarycorner.org.au"], why:"Look at the address bar at the top of the page."},
+    {k:"page", page:"pool"},
+    {q:"What time does the pool open on a normal day?", opts:["6 am", "8 am", "7 pm"], why:"Open every day, 6 am to 7 pm."},
+    {q:"When does the pool open on a public holiday?", opts:["8 am", "6 am", "It is closed."], why:"On public holidays, we open at 8 am."},
+    {q:"Where can you book an adult lesson?", opts:["Online, on the Lessons page.", "At the cafe.", "By email."], why:"Book online on the Lessons page."},
+    {q:"Xia is 72. How much does Xia pay?", opts:["$4", "$6", "Nothing"], why:"Xia pays the senior price: $4."},
+    {q:"Which can you NOT find at the pool?", opts:["A gym", "A cafe", "A kids' pool"], why:"The pool has a cafe, free parking and a kids' pool. There is no gym."}]},
+
+  {id:"G", grp:1, title:"Talk about the screen", desc:"Expressions, pointing with words and polite questions.", type:"q", shuffleQ:true, items:[
+    {tag:"Expression", q:"\"Just look it up.\" What does it mean?", opts:["Find it on the internet.", "Look up at the sky.", "Write it in your book."], why:"look up = find information. Just look it up = find it on the internet."},
+    {tag:"Expression", q:"\"Hold on, it's loading.\" What does it mean?", opts:["Wait a moment. The page is not ready.", "Hold the computer with two hands.", "The page is broken."], why:"Hold on = wait. Loading = the page is not ready yet."},
+    {tag:"Expression", q:"\"It's right up the top.\" Where is it?", opts:["Near the top of the screen.", "At the bottom of the page.", "On the next page."], why:"right up the top = very near the top of the screen."},
+    {tag:"Expression", q:"\"That's handy.\" What does it mean?", opts:["That is useful for me.", "That is in my hand.", "That is too hard."], why:"handy = useful."},
+    {tag:"Expression", q:"\"Easy as.\" What does it mean?", opts:["That is very easy. No problem.", "That is not easy.", "Do it fast."], why:"Easy as is a short, friendly Australian way to say very easy."},
+    {tag:"Expression", q:"You say thank you. Your friend says \"Anytime.\" What does it mean?", opts:["Happy to help. Ask me again.", "I have no time.", "What time is it?"], why:"Anytime = you are welcome. I can help you again."},
+    {tag:"Point with words", q:"Which sentence is clear?", opts:["Click on the blue title, under the ad.", "Click that one.", "Look over there."], why:"A clear sentence says what it is and where it is."},
+    {tag:"Point with words", q:"Which sentence is clear?", opts:["The back arrow is at the top, on the left.", "It's up there somewhere.", "Press that thing."], why:"at the top, on the left tells your partner the place."},
+    {tag:"Friendly or polite", q:"You ask a library worker for help. Which question is polite?", opts:["Excuse me, could you show me where to click, please?", "Where do I click?", "Hey, click it for me."], why:"Where do I click? is fine with a friend. With a worker, say Excuse me, could you ... please?"}]},
+  {id:"H", grp:1, title:"Say it", desc:"Strong parts of words and web addresses.", type:"q", intro:"stress", items:[
+    {k:"fixed", tag:"Word stress", sayw:"password", q:"password", opts:["Oo", "oO", "Ooo", "oOo"], ans:0, why:"PASS-word. Two parts. The first part is strong: Oo."},
+    {k:"fixed", tag:"Word stress", sayw:"explore", q:"explore", opts:["Oo", "oO", "Ooo", "oOo"], ans:1, why:"ex-PLORE. Two parts. The second part is strong: oO."},
+    {k:"fixed", tag:"Word stress", sayw:"video", q:"video", opts:["Oo", "oO", "Ooo", "oOo"], ans:2, why:"VI-de-o. Three parts. The first part is strong: Ooo."},
+    {k:"fixed", tag:"Word stress", sayw:"connection", q:"connection", opts:["Oo", "oO", "Ooo", "oOo"], ans:3, why:"con-NEC-tion. Three parts. The middle part is strong: oOo."},
+    {k:"fixed", tag:"Word stress", sayw:"refresh", q:"refresh", opts:["Oo", "oO", "Ooo", "oOo"], ans:1, why:"re-FRESH. The second part is strong: oO."},
+    {k:"fixed", tag:"Word stress", sayw:"library", q:"library", opts:["Oo", "oO", "Ooo", "oOo"], ans:2, why:"LI-brar-y. The first part is strong: Ooo."},
+    {k:"fixed", tag:"Word stress", sayw:"website", q:"website", opts:["Oo", "oO", "Ooo", "oOo"], ans:0, why:"WEB-site. The first part is strong: Oo."},
+    {k:"fixed", tag:"Word stress", sayw:"discover", q:"discover", opts:["Oo", "oO", "Ooo", "oOo"], ans:3, why:"dis-COV-er. The middle part is strong: oOo."},
+    {tag:"Web address", q:"How do you say / in a web address?", opts:["slash", "dash", "dot"], why:"/ = slash. - = dash. . = dot."},
+    {tag:"Web address", q:"How do you say - in a web address?", opts:["dash", "slash", "line"], why:"- = dash. For example: lane cove dash art."},
+    {tag:"Web address", q:"How do you say .com.au?", opts:["dot com dot a u", "com au", "dot come dot ow"], why:"Say each part: dot com dot a u."},
+    {tag:"Web address", q:"How do you say www.wavertonbooks.com.au?", opts:["double u, double u, double u, dot, waverton books, dot com, dot a u", "w w w, waverton books, com au", "double u, dot, waverton books, dot, a u"], why:"www = double u, double u, double u. Then say every dot."},
+    {tag:"Web address", q:"You hear: double u, double u, double u, dot, lane cove, dash, art, dot org, dot a u. Which address is it?", opts:["www.lanecove-art.org.au", "www.lanecoveart.com.au", "www.lanecove/art.org.au"], why:"dash = -. dot org = .org."}]},
+  {id:"I", grp:1, title:"Now or always?", desc:"Simple present and present continuous.", type:"q", shuffleQ:true, items:[
+    {tag:"Grammar", q:"Shh! Coco ___ a video right now.", opts:["is watching", "watches"], why:"right now = it is happening now. Use am / is / are + verb-ing."},
+    {tag:"Grammar", q:"The refresh button ___ the page again. That is its job.", opts:["loads", "is loading"], why:"This is a fact. It is always true. Use the simple present."},
+    {tag:"Grammar", q:"I ___ my email every morning.", opts:["check", "am checking"], why:"every morning = a habit. Use the simple present."},
+    {tag:"Grammar", q:"Look! The page ___ now.", opts:["is loading", "loads"], why:"Look! and now = it is happening now."},
+    {tag:"Grammar", q:"Jason ___ the bus times on a phone at the moment.", opts:["is reading", "reads"], why:"at the moment = now. Use is + reading."},
+    {tag:"Grammar", q:"This website ___ a menu under the logo.", opts:["has", "is having"], why:"has is a fact here. We do not say is having for this."},
+    {tag:"Grammar", q:"___ you looking at the screen now?", opts:["Are", "Do"], why:"now = present continuous. Are you looking ...?"},
+    {tag:"Grammar", q:"Yuko never ___ bills online. Yuko pays at the post office.", opts:["pays", "is paying"], why:"never = a habit. Use the simple present: pays."},
+    {tag:"Grammar", q:"Tingting ___ use the internet for banking. Never!", opts:["doesn't", "isn't"], why:"A habit in the negative: doesn't + verb. Tingting doesn't use ..."}]},
+  {id:"J", grp:1, title:"Screen words", desc:"Prepositions, phrasal verbs and screen verbs.", type:"q", shuffleQ:true, items:[
+    {tag:"Preposition", q:"The menu is ___ the top of the page.", opts:["at", "on", "in"], why:"at the top, at the bottom."},
+    {tag:"Preposition", q:"Type the address ___ the address bar.", opts:["in", "on", "at"], why:"in the address bar, in the search bar."},
+    {tag:"Preposition", q:"The menu is ___ the logo.", opts:["under", "between", "into"], why:"under = below. The menu is under the logo."},
+    {tag:"Preposition", q:"Move the mouse ___ Community life. A list opens.", opts:["over", "into", "from"], why:"over = the mouse is on top of it."},
+    {tag:"Preposition", q:"Click ___ the blue title.", opts:["on", "at", "in"], why:"click on a link, click on a title."},
+    {tag:"Preposition", q:"Scroll ___ to see the opening hours.", opts:["down", "under", "below"], why:"scroll down, scroll up."},
+    {tag:"Preposition", q:"Click on the logo to go ___ the home page.", opts:["back to", "back", "back at"], why:"go back to the home page."},
+    {tag:"Preposition", q:"The star is ___ the address bar, on the right.", opts:["next to", "into", "from"], why:"next to = beside."},
+    {tag:"Phrasal verb", q:"Which sentence is right?", opts:["I look it up on my phone.", "I look up it on my phone.", "I look it on my phone."], why:"With it, him or them, always split: look it up. Not: look up it."},
+    {tag:"Phrasal verb", q:"Which sentence is right?", opts:["Please click on it.", "Please click it on.", "Please click in it."], why:"click on does not split: click on it."},
+    {tag:"Phrasal verb", q:"Alan wants the bus times. Which sentence is right?", opts:["Alan looks them up.", "Alan looks up them.", "Alan looks them on."], why:"look them up. Split it with them."},
+    {tag:"Screen verb", q:"___ the browser icon. The browser opens.", opts:["Double click", "Print", "Send"], why:"Double click an icon to open it."},
+    {tag:"Screen verb", q:"Finished? ___ the browser.", opts:["Close", "Scroll", "Type"], why:"Close the browser when you finish."},
+    {tag:"Screen verb", q:"___ down the page. Find the opening hours.", opts:["Scroll", "Print", "Select"], why:"Scroll down moves the page."}]},
+  {id:"K", grp:1, title:"Join it: and or but", desc:"Join two ideas in one sentence.", type:"q", shuffleQ:true, items:[
+    {k:"fixed", tag:"Joining word", q:"The website has classes ___ a garden.", opts:["and", "but"], ans:0, why:"and adds a similar idea."},
+    {k:"fixed", tag:"Joining word", q:"I can see the menu, ___ I can't find the Classes page.", opts:["and", "but"], ans:1, why:"but shows a difference."},
+    {k:"fixed", tag:"Joining word", q:"The first result looks useful, ___ it is an ad.", opts:["and", "but"], ans:1, why:"It looks useful. It is an ad. That is a difference: but."},
+    {k:"fixed", tag:"Joining word", q:"Linda reads the news ___ checks the weather online.", opts:["and", "but"], ans:0, why:"Two similar things: and."},
+    {k:"fixed", tag:"Joining word", q:"David uses the internet for videos, ___ not for shopping.", opts:["and", "but"], ans:1, why:"Yes for videos, no for shopping: but."},
+    {k:"fixed", tag:"Joining word", q:"Nan knows the address ___ types it in the address bar.", opts:["and", "but"], ans:0, why:"Two actions, one after the other: and."}]},
+  {id:"L", grp:1, title:"Polite or not?", desc:"Sort sentences for a request email.", type:"q", shuffleQ:true, intro:"sort", items:[
+    {k:"fixed", tag:"Sort it", q:"Could you please check the lift before Friday?", opts:["Polite and neutral", "Too informal", "Angry or rude"], ans:0, why:"Could you please ...? is a polite request."},
+    {k:"fixed", tag:"Sort it", q:"Hey mate, the lift is cactus lol", opts:["Polite and neutral", "Too informal", "Angry or rude"], ans:1, why:"Hey mate, cactus and lol are for friends."},
+    {k:"fixed", tag:"Sort it", q:"Fix it now!!!", opts:["Polite and neutral", "Too informal", "Angry or rude"], ans:2, why:"An order with !!! sounds angry."},
+    {k:"fixed", tag:"Sort it", q:"Would you be able to replace the light?", opts:["Polite and neutral", "Too informal", "Angry or rude"], ans:0, why:"Would you be able to ...? is polite."},
+    {k:"fixed", tag:"Sort it", q:"Thx heaps :)", opts:["Polite and neutral", "Too informal", "Angry or rude"], ans:1, why:"Thx and :) are for text messages to friends."},
+    {k:"fixed", tag:"Sort it", q:"This is the worst building in Sydney.", opts:["Polite and neutral", "Too informal", "Angry or rude"], ans:2, why:"This is rude. It does not help."},
+    {k:"fixed", tag:"Sort it", q:"I would appreciate it if you could call me.", opts:["Polite and neutral", "Too informal", "Angry or rude"], ans:0, why:"I would appreciate it if you could ... is very polite."},
+    {k:"fixed", tag:"Sort it", q:"Cya Fri!", opts:["Polite and neutral", "Too informal", "Angry or rude"], ans:1, why:"Cya Fri is short text message language."},
+    {k:"fixed", tag:"Sort it", q:"You never fix anything here.", opts:["Polite and neutral", "Too informal", "Angry or rude"], ans:2, why:"You never ... sounds angry."}]},
+  {id:"M", grp:1, title:"Fix the email", desc:"Plan a request email. Fix mistakes with the codes.", type:"q", items:[
+    {tag:"Text type", q:"Two things in a computer room are broken. What should you write?", opts:["A polite, more formal email to the coordinator.", "A short text with emojis to a classmate.", "A job application."], why:"You ask a worker for help. Write a polite, more formal email."},
+    {tag:"Subject line", q:"Which is the best subject line?", opts:["Two problems in the change room", "hi", "READ THIS NOW!!!"], why:"A good subject line is short and tells the topic."},
+    {tag:"Stages", q:"What goes first, after the greeting?", opts:["Who you are and why you are writing.", "Kind regards and your name.", "Your phone number."], why:"Start with why you are writing. Then the two problems. Then when and your contact details."},
+    {tag:"Code C", show:"dear Robin,   (C)", q:"C means capital letter. What is the fix?", opts:["Dear Robin,", "dear robin,", "DEAR ROBIN,"], why:"Dear starts with a capital letter. Names have a capital letter too."},
+    {tag:"Code MW", show:"I writing to you about two problems.   (MW)", q:"MW means missing word. What is the fix?", opts:["I am writing to you about two problems.", "I writes to you about two problems.", "I writing you about two problems."], why:"Present continuous needs am / is / are: I am writing."},
+    {tag:"Code SV", show:"The lock on locker 12 are broken.   (SV)", q:"SV means subject verb agreement. What is the fix?", opts:["The lock on locker 12 is broken.", "The lock on locker 12 be broken.", "The locks on locker 12 is broken."], why:"One lock = is. Two locks = are."},
+    {tag:"Code Pr", show:"Could you fix they before Tuesday?   (Pr)", q:"Pr means wrong pronoun. What is the fix?", opts:["Could you fix them before Tuesday?", "Could you fix their before Tuesday?", "Could you fix it they before Tuesday?"], why:"After a verb, use them: fix them."},
+    {tag:"Code WW", show:"You can call me in 0400 111 222.   (WW)", q:"WW means wrong word. What is the fix?", opts:["You can call me on 0400 111 222.", "You can call me at in 0400 111 222.", "You can call me 0400 111 222 in."], why:"call me on + a phone number."},
+    {tag:"Code Par", show:"Kind regards, Julia   (Par)", q:"Where does the name go?", opts:["On the next line, under Kind regards,", "On the same line as Kind regards,", "Before Kind regards,"], why:"The closing and your name go on two lines."}]}
+];
+var PCOL = {G:["#0F7D7D", "#DDF0F0"], H:["#6A4C9C", "#ECE6F5"], I:["#2F5FA8", "#E3EBF7"], J:["#2E7D4F", "#E2F1E7"], K:["#A3462B", "#F6E4DE"], L:["#9C2F6B", "#F5E2EC"], M:["#1B3A5C", "#E2E9F1"]};
+function colOf(P){ if(PCOL[P.id]) return {c:PCOL[P.id][0], ink:"#ffffff", tint:PCOL[P.id][1]}; return {c:"#F5A20F", ink:"#141414", tint:"#FFF0D2"}; }
+var GROUPS = [{t:"Use the computer", c:"#F5A20F"}, {t:"What you know", c:"linear-gradient(90deg,#0F7D7D 0 33%,#6A4C9C 33% 66%,#2F5FA8 66%)"}];
+
+/* give every scored item an id */
+(function(){
+  for(var p = 0; p < PARTS.length; p++){
+    var P = PARTS[p];
+    if(P.type === "q"){ var n = 0; for(var i = 0; i < P.items.length; i++){ if(P.items[i].k !== "page"){ n++; P.items[i].id = P.id + n; } } }
+  }
+})();
+function scored(P){
+  if(P.type === "sim"){ var a = []; for(var i = 0; i < P.tasks.length; i++) a.push(P.id + "t" + i); return a; }
+  var b = []; for(var j = 0; j < P.items.length; j++) if(P.items[j].k !== "page") b.push(P.items[j].id); return b;
+}
+var TOTAL = 0; for(var tp = 0; tp < PARTS.length; tp++) TOTAL += scored(PARTS[tp]).length;
+
+/* ===================== STATE ===================== */
+var S = blank();
+function blank(){ return {v:"menu", p:0, size:1, ans:{}, ord:{}, seq:{}, step:{}, typed:{}, fb:{}, last:null}; }
+function load(){
+  try{ localStorage.setItem("__t", "1"); localStorage.removeItem("__t"); storeOK = true;
+    var raw = localStorage.getItem(KEY); if(raw){ var o = JSON.parse(raw); for(var k in o) if(o.hasOwnProperty(k)) S[k] = o[k]; } }catch(e){ storeOK = false; }
+  if(S.size == null || S.size < 0 || S.size >= SIZES.length) S.size = 1;
+}
+var savedT = null;
+function save(show){
+  if(!storeOK) return;
+  try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){ return; }
+  if(show){ var el = document.getElementById("saved"); el.className = "saved on"; clearTimeout(savedT); savedT = setTimeout(function(){ el.className = "saved"; }, 900); }
+}
+function stepOf(P){ return S.step[P.id] || 0; }
+function taskSeq(P){
+  if(!P.shuffleTasks) return range(P.tasks.length);
+  if(!S.seq[P.id]) S.seq[P.id] = shuffle(range(P.tasks.length));
+  return S.seq[P.id];
+}
+function remaining(P){
+  if(P.type === "sim") return P.tasks.length - stepOf(P);
+  var ks = scored(P), r = 0; for(var i = 0; i < ks.length; i++) if(!S.ans[ks[i]]) r++; return r;
+}
+function answeredN(P){ var ks = scored(P), n = 0; for(var i = 0; i < ks.length; i++) if(S.ans[ks[i]]) n++; return n; }
+function rightN(P){ var ks = scored(P), n = 0; for(var i = 0; i < ks.length; i++) if(S.ans[ks[i]] && S.ans[ks[i]].ok) n++; return n; }
+function totals(){ var r = 0, a = 0; for(var i = 0; i < PARTS.length; i++){ r += rightN(PARTS[i]); a += answeredN(PARTS[i]); } return {r:r, a:a}; }
+function partDone(P){ return remaining(P) === 0; }
+
+/* ===================== SIMULATIONS ===================== */
+var CUR = null;
+function hit(id, label, cls, kids){
+  var c = "hit" + (cls ? " " + cls : "");
+  if(FLASH && FLASH.id === id) c += FLASH.ok ? " okf" : " nof";
+  return h("button", {cls:c, "data-hit":id, "aria-label":label, onclick:function(){ simTap(CUR, id, label); }}, kids);
+}
+function isTarget(T, id){ if(T.target instanceof Array) return T.target.indexOf(id) > -1; return T.target === id; }
+
+function simTap(P, id, label){
+  var st = stepOf(P);
+  if(st >= P.tasks.length) return;
+  var seq = taskSeq(P), ti = seq[st], T = P.tasks[ti], key = P.id + "t" + ti;
+  if(T.type === "type"){
+    var typed = S.typed[P.id] || (S.typed[P.id] = []);
+    var want = T.seq[typed.length];
+    if(id === "k:" + want){
+      typed.push(want);
+      if(typed.length === T.seq.length){
+        if(!S.ans[key]) S.ans[key] = {ok:true, pick:"www.cammeraygreenpool.com.au"};
+        S.step[P.id] = st + 1; S.fb[P.id] = {ok:true, msg:T.why};
+      } else S.fb[P.id] = {ok:true, msg:"Good. Keep going."};
+      FLASH = {id:id, ok:true};
+    } else {
+      if(!S.ans[key]) S.ans[key] = {ok:false, pick:(typed.join("") + label.replace("the key ", "")) + " ..."};
+      S.fb[P.id] = {ok:false, msg:id === "enter" ? "Finish the address first." : "Not this part. Look at the address again."};
+      FLASH = {id:id, ok:false};
+    }
+    save(true); renderKeep(); return;
+  }
+  if(isTarget(T, id)){
+    if(!S.ans[key]) S.ans[key] = {ok:true, pick:label};
+    S.step[P.id] = st + 1; S.fb[P.id] = {ok:true, msg:T.why}; FLASH = {id:id, ok:true};
+    if(P.sim === "search" && st + 1 === P.tasks.length){ LOADT = Date.now(); }
+  } else {
+    if(!S.ans[key]) S.ans[key] = {ok:false, pick:label};
+    S.fb[P.id] = {ok:false, msg:"That is " + label + ". Try again."}; FLASH = {id:id, ok:false};
+  }
+  save(true); renderKeep();
+  if(LOADT && P.sim === "search"){ setTimeout(function(){ LOADT = null; if(S.v === "part" && PARTS[S.p] === P) renderKeep(); }, 1100); }
+}
+
+function tabs(list, plus){
+  var row = h("div", {cls:"tabs"});
+  for(var i = 0; i < list.length; i++){
+    var t = list[i];
+    row.appendChild(h("div", {cls:"tabw" + (t.on ? " on" : "")}, [
+      hit(t.id, t.label, "tabt", t.text), hit(t.xid, t.xlabel, "tabx", "\u2715")]));
+  }
+  if(plus !== false) row.appendChild(hit("plus", "the plus to open a new tab", "", "+"));
+  return row;
+}
+function tool(url){
+  return h("div", {cls:"tool"}, [
+    hit("back", "the back arrow", "", "\u2190"), hit("fwd", "the forward arrow", "fwd", "\u2192"), hit("refresh", "the refresh button", "", "\u27F3"),
+    hit("addr", "the address bar", "addr", url ? "\uD83D\uDD12 " + url : "Search or type a web address"),
+    hit("star", "the star (save this page)", "", "\u2606"), hit("dots", "the three dots menu", "", "\u22EE")]);
+}
+function chrome(tabList, url, plus){ return h("div", {cls:"chrome"}, [tabs(tabList, plus), tool(url)]); }
+function coveTabs(two){
+  var a = [{id:"tab1", label:"the tab you can see now (The Cove Hub)", text:"The Cove Hub", xid:"x1", xlabel:"the x to close a tab", on:true}];
+  if(two) a.push({id:"tab2", label:"another tab (Weather Sydney)", text:"Weather Sydney", xid:"x2", xlabel:"the x to close a tab"});
+  return a;
+}
+function scrollCol(low){ return h("div", {cls:"scol"}, hit("scroll", "the scroll bar", "", h("span", {cls:"thumb" + (low ? " low" : "")}))); }
+function coveHead(withSearch){
+  return h("div", {cls:"phead"}, [hit("logo", "the logo", "logo", [h("i", null, "C"), "The Cove Hub"]),
+    withSearch ? hit("search", "the search box for this site", "sbox", "Search this site \uD83D\uDD0E") : null]);
+}
+function coveNav(mode){
+  var items = [["home", "Home"], ["about", "About us"], ["cl", "Community life \u25BE"], ["classes", "Classes \u25BE"], ["contact", "Contact"]];
+  var nav = h("div", {cls:"nav"});
+  for(var i = 0; i < items.length; i++){
+    if(mode === "bar") nav.appendChild(hit("menu", "the menu bar", "", items[i][1]));
+    else nav.appendChild(hit(items[i][0], items[i][1].replace(" \u25BE", ""), "", items[i][1]));
+  }
+  return nav;
+}
+
+var SIMS = {
+  desktop: function(P, st){
+    if(!S.ord.icons) S.ord.icons = shuffle(range(ICONS.length));
+    var shown = {}, seq = taskSeq(P);
+    for(var i = 0; i < st; i++) shown[P.tasks[seq[i]].target] = true;
+    var grid = h("div", {cls:"icons"});
+    for(var k = 0; k < S.ord.icons.length; k++){
+      var I = ICONS[S.ord.icons[k]];
+      var ic = h("span", {cls:"ic"}); ic.innerHTML = '<svg viewBox="0 0 48 48" aria-hidden="true" fill="none" stroke="#1f1f1f" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">' + I.svg + '</svg>';
+      grid.appendChild(hit(I.id, ICONLABEL[I.id], shown[I.id] ? "done" : "", [ic, h("span", {cls:"icl"}, shown[I.id] ? I.name : "\u00A0")]));
+    }
+    var start = h("span", {cls:"startb", "aria-hidden":"true"}); start.innerHTML = '<svg viewBox="0 0 20 20"><rect x="1" y="1" width="8" height="8" fill="#fff"/><rect x="11" y="1" width="8" height="8" fill="#fff"/><rect x="1" y="11" width="8" height="8" fill="#fff"/><rect x="11" y="11" width="8" height="8" fill="#fff"/></svg>';
+    return h("div", {cls:"desk"}, [h("div", {cls:"wall"}, grid),
+      h("div", {cls:"taskbar"}, [start, h("span", {cls:"tsearch"}, "\uD83D\uDD0E Search"), h("span", {cls:"clock"}, [h("b", null, "9:41 am"), h("span", null, "13/10/2026")])])]);
+  },
+  browser: function(P){
+    return h("div", null, [chrome(coveTabs(true), "www.thecovehub.org.au"),
+      h("div", {cls:"page"}, [h("div", {cls:"pcont"}, [
+        coveHead(true), coveNav("bar"),
+        h("div", {cls:"herop"}, [hit("heading", "the page heading", "", h("h3", null, "Learn, meet and get help")),
+          h("div", null, "45 Bay Road, Waverton NSW 2060"),
+          hit("find", "a button (Find a class)", "findbtn", "Find a class"),
+          hit("cursor", "the cursor", "cursor", "\u2196")]),
+        h("div", {cls:"cards"}, [hit("box", "a box of information", "", [h("b", null, "Free computer help"), h("span", null, "Tuesday and Thursday")]),
+          hit("box", "a box of information", "", [h("b", null, "Opening hours"), h("span", null, "Monday to Saturday")])])]),
+        scrollCol(false)])]);
+  },
+  search: function(P, st){
+    if(st >= P.tasks.length){
+      if(LOADT) return h("div", null, [chrome(coveTabs(false), "www.thecovehub.org.au"), h("div", {cls:"loading"}, "\u23F3 Loading ...")]);
+      return coveHome(false);
+    }
+    function res(urlId, urlLabel, url, tId, tLabel, title, desc, spons){
+      return h("div", {cls:"res"}, [
+        h("div", {cls:"row", style:"gap:0"}, [spons ? hit("sponsored", "the word Sponsored", "spons", "Sponsored") : null, hit(urlId, urlLabel, "rurl", url)]),
+        hit(tId, tLabel, "rt", title), h("div", {cls:"rd"}, desc)]);
+    }
+    var tabsS = [["all", "All"], ["images", "Images"], ["maps", "Maps"], ["news", "News"], ["videos", "Videos"]];
+    var tb = h("div", {cls:"stabs"});
+    for(var i = 0; i < tabsS.length; i++) tb.appendChild(hit(tabsS[i][0], "the word " + tabsS[i][1], i === 0 ? "cur" : "", tabsS[i][1]));
+    return h("div", null, [
+      chrome([{id:"tab1", label:"the tab", text:"cove hub waverton - Search", xid:"x1", xlabel:"the x to close a tab", on:true}], "www.searchly.com/?q=cove+hub+waverton"),
+      h("div", {cls:"serp row"}, [h("span", {cls:"slogo"}, "Searchly"), hit("sbox", "the search box", "sbox", "cove hub waverton")]), tb,
+      res("adurl", "the web address of the ad", "www.fastcomputerdeals.com.au", "ad", "the ad (Cheap laptops)", "Cheap laptops today only | Buy now", "Big sale on laptops and tablets. Free delivery. Pay later.", true),
+      res("coveurl", "the web address of The Cove Hub", "www.thecovehub.org.au", "covet", "The Cove Hub title", "The Cove Hub | Learn, meet and get help in Waverton", "Free computer help, classes, clubs and a community garden. 45 Bay Road."),
+      res("newsurl", "the web address of the news story", "www.northshorenewsdaily.com.au \u203A local", "newst", "the news story about a garden", "New garden opens at Waverton hub", "Local people met on Saturday for the opening of a new garden ..."),
+      res("boaturl", "the web address of Cove Boat Rides", "www.coveboatrides.com.au", "boatt", "the Cove Boat Rides title", "Cove Boat Rides | Harbour trips", "Book a boat trip on Sydney Harbour.")]);
+  },
+  menus: function(P, st){
+    if(st >= 6) return h("div", null, [h("div", {cls:"chrome"}, [h("div", {cls:"tabs"}, [h("div", {cls:"tabw on"}, h("span", {cls:"hit tabt"}, "New tab"))]), tool("")]),
+      h("div", {cls:"blank"}, "\u2705 You closed the website.")]);
+    if(st === 3 || st === 4){
+      return h("div", null, [chrome(coveTabs(false), "www.thecovehub.org.au/library-corner/digital-help"),
+        h("div", {cls:"page"}, [h("div", {cls:"pcont"}, [coveHead(false), coveNav(),
+          h("div", {cls:"pbody"}, [h("h3", null, "Digital help sessions"),
+            h("p", null, "Do you need help with a phone, a tablet or a computer? Our volunteers help you, one to one. Sessions are free."),
+            st === 3 ? h("p", {cls:"fade"}, "\u25BC More below ...") : h("p", null, [h("b", null, "When: "), "Tuesday and Thursday, 10 am to 12 pm. Each session is 30 minutes."]),
+            st === 4 ? h("p", null, [h("b", null, "Book: "), "Call 9955 0000 or ask at the front desk."]) : null])]), scrollCol(st === 4)])]);
+    }
+    var kids = [coveHead(false), coveNav()];
+    if(st >= 1){
+      var l1 = [["lc", "Library corner \u203A"], ["helpdesk", "Help desk"], ["clubs", "Clubs and groups"], ["vol", "Volunteer with us"]];
+      var d1 = h("div", {cls:"drop"});
+      for(var i = 0; i < l1.length; i++) d1.appendChild(hit(l1[i][0], l1[i][1].replace(" \u203A", ""), (st >= 2 && i === 0) ? "open" : "", l1[i][1]));
+      kids.push(d1);
+    }
+    if(st >= 2){
+      var l2 = [["books", "Books and magazines"], ["comp", "Computers and printing"], ["dig", "Digital help sessions"], ["homelib", "Home library service"]];
+      var d2 = h("div", {cls:"drop two"});
+      for(var j = 0; j < l2.length; j++) d2.appendChild(hit(l2[j][0], l2[j][1], "", l2[j][1]));
+      kids.push(d2);
+    }
+    if(st === 0 || st === 5) kids.push(h("div", {cls:"herop"}, [h("h3", null, "Learn, meet and get help"), h("div", null, "45 Bay Road, Waverton NSW 2060")]));
+    return h("div", null, [chrome(coveTabs(false), "www.thecovehub.org.au"), h("div", {cls:"page"}, [h("div", {cls:"pcont"}, kids), scrollCol(false)])]);
+  },
+  solo: function(P, st){
+    if(st === 0) return SIMS.desktop({tasks:[], id:"E"}, 0);
+    if(st >= 7) return h("div", null, [h("div", {cls:"chrome"}, [h("div", {cls:"tabs"}, [h("div", {cls:"tabw on"}, h("span", {cls:"hit tabt"}, "New tab"))]), tool("")]),
+      h("div", {cls:"blank"}, "\u2705 You closed the website. Well done!")]);
+    if(st <= 3){
+      var typed = (S.typed[P.id] || []).join("");
+      var url = st === 1 ? "" : (st === 2 ? typed : "www.cammeraygreenpool.com.au");
+      var parts = [h("div", {cls:"chrome"}, [h("div", {cls:"tabs"}, [h("div", {cls:"tabw on"}, [hit("tab1", "the tab", "tabt", "New tab"), hit("x1", "the x to close a tab", "tabx", "\u2715")]), hit("plus", "the plus to open a new tab", "", "+")]),
+        h("div", {cls:"tool"}, [hit("back", "the back arrow", "", "\u2190"), hit("refresh", "the refresh button", "", "\u27F3"),
+          hit("addr", "the address bar", "addr", st === 1 ? "Search or type a web address" : [url, st === 2 ? h("span", {style:"color:#F5A20F;font-weight:700"}, "|") : null])])]),
+        h("div", {cls:"blank"}, st === 1 ? "New tab" : "")];
+      if(st >= 2){
+        if(!S.ord.keys) S.ord.keys = shuffle(["www", ".", "cammeraygreenpool", "com", "au", "org", "/", "-", "cammeraypool", "net"]);
+        var kb = h("div", {cls:"keys"});
+        for(var i = 0; i < S.ord.keys.length; i++) kb.appendChild(hit("k:" + S.ord.keys[i], "the key " + S.ord.keys[i], "", S.ord.keys[i]));
+        kb.appendChild(hit("enter", "the Enter key", "enter", "Enter \u23CE"));
+        parts.push(kb);
+      }
+      return h("div", null, parts);
+    }
+    var poolTabs = [{id:"tab1", label:"the tab", text:"Cammeray Green Pool", xid:"x1", xlabel:"the x to close a tab", on:true}];
+    var nav = h("div", {cls:"nav"}, [hit("home", "Home", "", "Home"), hit("swim", "Swim times", "", "Swim times"), hit("lessons", "Lessons", "", "Lessons"), hit("prices", "Prices", "", "Prices"), hit("contact", "Contact", "", "Contact")]);
+    var body = st === 5 ?
+      h("div", {cls:"pbody"}, [h("h3", null, "Lessons"), h("p", null, "Adult lessons: Tuesday and Friday at 11 am."), h("p", null, "Book online on this page."), hit("book", "the Book online button", "findbtn", "Book online")]) :
+      h("div", {cls:"pbody"}, [h("h3", null, "Welcome to Cammeray Green Pool"), h("p", null, "We are a heated outdoor pool on Miller Street, Cammeray 2062."), h("p", null, "Open: every day, 6 am to 7 pm.")]);
+    return h("div", null, [chrome(poolTabs, "www.cammeraygreenpool.com.au" + (st === 5 ? "/lessons" : "")),
+      h("div", {cls:"page"}, [h("div", {cls:"pcont"}, [h("div", {cls:"phead"}, hit("logo", "the logo", "logo", [h("i", null, "\uD83C\uDFCA"), "Cammeray Green Pool"])), nav, body]), scrollCol(false)])]);
+  }
+};
+function coveHome(){
+  return h("div", null, [chrome(coveTabs(false), "www.thecovehub.org.au"), h("div", {cls:"page"}, [h("div", {cls:"pcont"}, [coveHead(true), coveNav(),
+    h("div", {cls:"herop"}, [h("h3", null, "Learn, meet and get help"), h("div", null, "45 Bay Road, Waverton NSW 2060")]),
+    h("div", {cls:"blank", style:"padding:1em"}, "\u2705 You are on The Cove Hub home page.")]), scrollCol(false)])]);
+}
+
+function renderSim(P, w){
+  CUR = P;
+  var st = stepOf(P), seq = taskSeq(P), n = P.tasks.length, fb = S.fb[P.id];
+  var box = h("div", {cls:"taskbox", id:"taskbox"});
+  if(fb) box.appendChild(h("div", {cls:"tf " + (fb.ok ? "good" : "bad")}, (fb.ok ? "\u2713 " : "\u2717 ") + fb.msg));
+  if(st < n){
+    box.appendChild(h("div", {cls:"tn"}, "Task " + (st + 1) + " of " + n));
+    box.appendChild(h("div", {cls:"tt"}, P.tasks[seq[st]].t));
+  } else {
+    box.appendChild(h("div", {cls:"tt"}, "\u2705 Part finished! Right first time: " + rightN(P) + " of " + n + "."));
+  }
+  w.appendChild(box);
+  w.appendChild(h("div", {cls:"sim"}, SIMS[P.sim](P, st)));
+  if(P.sim === "menus") w.appendChild(h("p", {cls:"muted"}, "On a computer, you move the mouse over a menu. On a phone, you tap."));
+  if(st >= n || answeredN(P)) w.appendChild(h("div", {cls:"row"}, h("button", {cls:"chg", onclick:function(){ if(confirmTwice(this, "Tap again to start this part again")){ resetPart(P); renderTop(); } }}, "\u21BB Try this part again")));
+}
+function resetPart(P){
+  var ks = scored(P); for(var i = 0; i < ks.length; i++) delete S.ans[ks[i]];
+  delete S.step[P.id]; delete S.fb[P.id]; delete S.typed[P.id];
+  if(P.shuffleTasks) S.seq[P.id] = shuffle(range(P.tasks.length));
+  if(P.sim === "desktop" || P.sim === "solo"){ delete S.ord.icons; } if(P.sim === "solo") delete S.ord.keys;
+  if(P.type === "q") delete S.seq[P.id];
+  save(true);
+}
+
+/* ===================== STATIC PAGES ===================== */
+function staticPage(which){
+  if(which === "help") return h("div", {cls:"spage", id:"page-help"}, [h("div", {cls:"sbarr"}, h("div", {cls:"surl"}, "\uD83D\uDD12 www.thecovehub.org.au/library-corner/digital-help")),
+    h("div", {cls:"sc"}, [h("h3", null, "Digital help sessions"),
+      h("p", null, "Do you need help with a phone, a tablet or a computer? Our volunteers help you, one to one. Sessions are free."),
+      h("p", null, [h("b", null, "When: "), "Tuesday and Thursday, 10 am to 12 pm. Each session is 30 minutes."]),
+      h("p", null, [h("b", null, "What we can help with: "), "email, video calls, online forms, the myGov app and printing. Bring your own device, or use one of our six laptops."]),
+      h("p", null, [h("b", null, "Book: "), "Call 9955 0000 or ask at the front desk. You can't book by email."]),
+      h("p", null, [h("b", null, "Also in Library corner: "), "books and magazines in eight languages, a quiet study room and a photocopier."]),
+      h("p", {cls:"muted"}, "The Cove Hub \u00B7 45 Bay Road, Waverton NSW 2060")])]);
+  return h("div", {cls:"spage", id:"page-pool"}, [h("div", {cls:"sbarr"}, h("div", {cls:"surl"}, "\uD83D\uDD12 www.cammeraygreenpool.com.au")),
+    h("div", {cls:"snav"}, "Home | Swim times | Lessons | Prices | Contact"),
+    h("div", {cls:"sc"}, [h("h3", null, "Cammeray Green Pool"),
+      h("p", null, "Welcome to Cammeray Green Pool. We are a heated outdoor pool on Miller Street, Cammeray 2062."),
+      h("p", null, [h("b", null, "Open: "), "every day, 6 am to 7 pm. On public holidays, we open at 8 am."]),
+      h("p", null, [h("b", null, "Adult lessons: "), "Tuesday and Friday at 11 am. Book online on the Lessons page."]),
+      h("p", null, [h("b", null, "Prices: "), "adults $6, seniors $4, children under 5 free."]),
+      h("p", null, "We have a cafe, free parking for one hour and a kids' pool. Bring a lock for the lockers.")])]);
+}
+
+/* ===================== QUESTION CARDS ===================== */
+function itemOrder(P){
+  var idx = []; for(var i = 0; i < P.items.length; i++) idx.push(i);
+  if(!P.shuffleQ) return idx;
+  if(!S.seq[P.id]){ S.seq[P.id] = shuffle(idx); save(); }
+  return S.seq[P.id];
+}
+function optOrder(it){
+  if(it.k === "fixed") return range(it.opts.length);
+  if(!S.ord[it.id]){ S.ord[it.id] = shuffle(range(it.opts.length)); save(); }
+  return S.ord[it.id];
+}
+function correctIdx(it){ return it.k === "fixed" ? it.ans : 0; }
+function renderCard(P, it, n){
+  var a = S.ans[it.id], ci = correctIdx(it);
+  var card = h("div", {cls:"card" + (a ? (a.ok ? " ok" : " no") : ""), id:"c-" + it.id});
+  card.appendChild(h("div", {cls:"chead"}, [h("span", {cls:"num"}, String(n)), it.tag ? h("span", {cls:"tag"}, it.tag) : null,
+    it.sayw && window.speechSynthesis ? h("button", {cls:"say", onclick:function(){ say(it.sayw); }}, "\uD83D\uDD0A Hear it") : null]));
+  if(it.show) card.appendChild(h("div", {cls:"showtxt"}, it.show));
+  if(it.sayw) card.appendChild(h("div", {cls:"stress"}, it.q));
+  else card.appendChild(h("div", {cls:"q"}, it.q));
+  if(P.id === "F") card.appendChild(h("button", {cls:"chg", style:"margin:0 0 .3em", onclick:function(){ var pg = document.getElementById(n <= 6 ? "page-help" : "page-pool"); if(pg) pg.scrollIntoView({behavior:REDUCED ? "auto" : "smooth"}); }}, "\u2191 See the page"));
+  var ord = optOrder(it);
+  for(var j = 0; j < ord.length; j++){
+    (function(oi){
+      var cls = "opt", mk = "";
+      if(a){ if(oi === ci){ cls += " right"; mk = "\u2713"; } else if(a.pick === it.opts[oi]){ cls += " wrong"; mk = "\u2717"; } else cls += " dim"; }
+      card.appendChild(h("button", {cls:cls, onclick:function(){
+        if(S.ans[it.id]) return;
+        S.ans[it.id] = {ok:oi === ci, pick:it.opts[oi]}; S.last = P.id; save(true); renderKeep();
+      }}, [h("span", {cls:"ol"}, "ABCD".charAt(j)), h("span", {cls:"tx"}, it.opts[oi]), mk ? h("span", {cls:"mk"}, mk) : null]));
+    })(ord[j]);
+  }
+  if(a){
+    card.appendChild(h("div", {cls:"fb" + (a.ok ? " good" : "")}, [h("b", null, a.ok ? "Yes! That's right." : "Not quite. The answer is: " + it.opts[ci]), it.why]));
+    card.appendChild(h("button", {cls:"chg", onclick:function(){ delete S.ans[it.id]; save(true); renderKeep(); }}, "\u21BA Change my answer"));
+  }
+  return card;
+}
+function renderQ(P, w){
+  if(P.intro === "stress") w.appendChild(note("", "i", [h("p", null, "Every word has one strong part. We say it louder and longer."), h("p", null, [h("span", {cls:"hl"}, "O"), " = big and strong. ", h("span", {cls:"hl"}, "o"), " = small and weak."]), h("p", null, "Oo = BROWser. oO = seLECT.")]));
+  if(P.intro === "sort") w.appendChild(note("", "i", [h("p", null, "You write to a building manager. Two things are broken."), h("p", null, "Where does each sentence go?")]));
+  var ord = itemOrder(P), n = 0;
+  for(var i = 0; i < ord.length; i++){
+    var it = P.items[ord[i]];
+    if(it.k === "page"){ w.appendChild(staticPage(it.page)); continue; }
+    n++; w.appendChild(renderCard(P, it, n));
+  }
+}
+
+/* ===================== VIEWS ===================== */
+var main = document.getElementById("main"), wrap = document.getElementById("wrap"), foot = document.getElementById("foot");
+function setAddr(t){ document.getElementById("addr").textContent = "\uD83D\uDD12 vu23560 \u203A revision" + (t ? " \u203A " + t : ""); }
+function setProg(){
+  var pg = document.getElementById("prog"); pg.innerHTML = "";
+  for(var i = 0; i < PARTS.length; i++) pg.appendChild(h("i", {cls:partDone(PARTS[i]) || (S.v === "part" && S.p === i) ? "on" : "", style:"background:" + colOf(PARTS[i]).c}));
+}
+function confirmTwice(btn, msg){
+  if(btn.getAttribute("data-armed") === "1") return true;
+  btn.setAttribute("data-armed", "1"); var old = btn.textContent; btn.textContent = msg;
+  setTimeout(function(){ if(btn.parentNode){ btn.removeAttribute("data-armed"); btn.textContent = old; } }, 3000);
+  return false;
+}
+function sbar(l, t){ return h("div", {cls:"sbar"}, [h("div", {cls:"blk"}, l), h("div", {cls:"ttl"}, t)]); }
+
+function menuTile(P, i){
+  var tot = scored(P).length, an = answeredN(P), done = partDone(P), sc;
+  if(done) sc = h("span", {cls:"sc done"}, "Score: " + rightN(P) + " / " + tot);
+  else if(an || stepOf(P)) sc = h("span", {cls:"sc"}, (P.type === "sim" ? stepOf(P) : an) + " of " + tot + (P.type === "sim" ? " done" : " answered"));
+  var g = colOf(P);
+  return h("button", {cls:"mtile", style:"border-bottom-color:" + g.c, onclick:function(){ openPart(i); }}, [
+    h("span", {cls:"l", style:"background:" + g.c + ";color:" + g.ink}, P.id),
+    h("span", {cls:"t"}, [h("b", null, P.title), h("span", {cls:"d"}, P.desc), sc])]);
+}
+function renderMenu(){
+  document.body.className = "g0"; setAddr("menu");
+  var w = wrap;
+  w.appendChild(h("div", {cls:"hero"}, [h("div", {cls:"hbar"}, "\u25CF\u25CF\u25CF  \uD83D\uDD12 vu23560 \u203A lesson-1 \u203A revision"),
+    h("div", {cls:"panel"}, [h("div", {cls:"eyebrow"}, "Access the internet and email \u00B7 EAL Level 2"), h("div", {cls:"big"}, "Find it online"), h("div", null, "Revision: use the computer, then check what you know.")])]));
+  var t = totals();
+  if(t.a > 0){
+    var lp = S.last ? PARTS[indexOfPart(S.last)] : null, next = firstOpen();
+    w.appendChild(h("div", {cls:"welcome"}, [h("b", null, "Welcome back! \uD83D\uDC4B "), lp ? "You were on Part " + lp.id + ": " + lp.title + "." : "",
+      h("div", {cls:"row", style:"margin-top:.3em"}, [next > -1 ? h("button", {cls:"bb solid", onclick:function(){ openPart(next); }}, "Continue \u25B6") : h("button", {cls:"bb solid", onclick:function(){ go("results"); }}, "See my results")])]));
+  }
+  if(!storeOK) w.appendChild(note("warn", "!", h("p", null, "This page cannot save on this phone. You can still use it.")));
+  for(var g = 0; g < GROUPS.length; g++){
+    w.appendChild(h("div", {cls:"grouphead"}, [h("span", {cls:"sw", style:"background:" + GROUPS[g].c}), GROUPS[g].t]));
+    for(var i = 0; i < PARTS.length; i++) if(PARTS[i].grp === g) w.appendChild(menuTile(PARTS[i], i));
+  }
+  w.appendChild(h("div", {cls:"grouphead"}, [h("span", {cls:"sw", style:"background:#6B6B6B"}), "Finish"]));
+  w.appendChild(h("button", {cls:"mtile", style:"border-bottom-color:#6B6B6B", onclick:function(){ go("results"); }}, [h("span", {cls:"l", style:"background:#6B6B6B;color:#fff"}, "\u2605"),
+    h("span", {cls:"t"}, [h("b", null, "My results"), h("span", {cls:"d"}, "See your score. Go over your mistakes.")])]));
+  if(t.a > 0) w.appendChild(h("div", {cls:"row", style:"margin-top:.8em"}, h("button", {cls:"chg", onclick:function(){ if(confirmTwice(this, "Tap again to clear everything")){ var sz = S.size; S = blank(); S.size = sz; save(true); renderTop(); } }}, "Start again from the beginning")));
+  foot.innerHTML = "";
+  var nx = firstOpen();
+  foot.appendChild(h("button", {cls:"bb go", onclick:function(){ openPart(nx > -1 ? nx : 0); }}, nx > 0 ? "Continue \u25B6" : "Start \u25B6"));
+}
+function indexOfPart(id){ for(var i = 0; i < PARTS.length; i++) if(PARTS[i].id === id) return i; return 0; }
+function firstOpen(){ for(var i = 0; i < PARTS.length; i++) if(!partDone(PARTS[i])) return i; return -1; }
+
+function renderPart(){
+  var P = PARTS[S.p];
+  document.body.className = "g" + P.grp; var co = colOf(P); document.body.style.setProperty("--pc", co.c); document.body.style.setProperty("--pc-ink", co.ink); document.body.style.setProperty("--pc-tint", co.tint); document.body.style.setProperty("--tagc", PCOL[P.id] ? co.c : "#8A5300"); setAddr("part-" + P.id.toLowerCase());
+  var w = wrap;
+  w.appendChild(sbar(P.id, P.title));
+  w.appendChild(h("div", {cls:"lede"}, P.desc));
+  var tot = scored(P).length, an = P.type === "sim" ? stepOf(P) : answeredN(P);
+  w.appendChild(h("div", {cls:"live" + (P.type === "sim" ? " small" : "")}, [P.type === "sim" ? "Tasks done: " + an + " of " + tot + ". Right first time: " + rightN(P) + "." : "This part: " + rightN(P) + " correct out of " + answeredN(P) + " answered.",
+    h("div", {cls:"bar"}, h("i", {style:"width:" + Math.round(an / tot * 100) + "%"}))]));
+  if(P.type === "sim") renderSim(P, w); else renderQ(P, w);
+  if(partDone(P)) w.appendChild(partSummary(P));
+  else if(P.type === "q" && answeredN(P)) w.appendChild(h("div", {cls:"row", style:"margin-top:.6em"}, h("button", {cls:"chg", onclick:function(){ if(confirmTwice(this, "Tap again to clear this part")){ resetPart(P); renderTop(); } }}, "\u21BB Try this part again")));
+  renderPartFoot(P);
+  updatePill(P);
+}
+function partSummary(P){
+  var ks = scored(P), wrong = [];
+  for(var i = 0; i < ks.length; i++) if(S.ans[ks[i]] && !S.ans[ks[i]].ok) wrong.push(ks[i]);
+  var box = h("div", {cls:"summary"}, [h("b", null, "\uD83C\uDF89 Page finished! You got " + rightN(P) + " of " + ks.length + " right.")]);
+  if(wrong.length && P.type === "q"){
+    box.appendChild(h("div", {cls:"muted"}, "Look at these again:"));
+    var r = h("div");
+    for(var j = 0; j < wrong.length; j++){ (function(k){ r.appendChild(h("button", {cls:"mchip", onclick:function(){ flashCard(k); }}, "Question " + cardNum(P, k))); })(wrong[j]); }
+    box.appendChild(r);
+  }
+  if(P.type === "q") box.appendChild(h("button", {cls:"chg", onclick:function(){ if(confirmTwice(this, "Tap again to clear this part")){ resetPart(P); renderTop(); } }}, "\u21BB Try this part again"));
+  return box;
+}
+function cardNum(P, key){ var ord = itemOrder(P), n = 0; for(var i = 0; i < ord.length; i++){ var it = P.items[ord[i]]; if(it.k === "page") continue; n++; if(it.id === key) return n; } return "?"; }
+function flashCard(key){
+  var c = document.getElementById("c-" + key); if(!c) return;
+  c.scrollIntoView({behavior:REDUCED ? "auto" : "smooth", block:"center"});
+  c.classList.remove("flash"); void c.offsetWidth; c.classList.add("flash");
+}
+function firstUnanswered(P){
+  if(P.type === "sim") return document.getElementById("taskbox");
+  var ord = itemOrder(P);
+  for(var i = 0; i < ord.length; i++){ var it = P.items[ord[i]]; if(it.k !== "page" && !S.ans[it.id]) return document.getElementById("c-" + it.id); }
+  return null;
+}
+function renderPartFoot(P){
+  foot.innerHTML = "";
+  var left = remaining(P);
+  foot.appendChild(h("button", {cls:"bb menub", "aria-label":"Main menu", onclick:function(){ go("menu"); }}, "\u2630 Menu"));
+  foot.appendChild(h("button", {cls:"bb", "aria-label":S.p > 0 ? "Back to Part " + PARTS[S.p - 1].id : "Back to the menu", onclick:function(){ if(S.p > 0) openPart(S.p - 1); else go("menu"); }}, S.p > 0 ? "\u25C0 " + PARTS[S.p - 1].id : "\u25C0 Back"));
+  var last = S.p === PARTS.length - 1;
+  if(left > 0){
+    foot.appendChild(h("button", {cls:"bb wait", onclick:function(){
+      blocked++;
+      var el = firstUnanswered(P);
+      if(el){ el.scrollIntoView({behavior:REDUCED ? "auto" : "smooth", block:P.type === "sim" ? "start" : "center"}); el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash"); }
+      if(blocked >= 2) renderPartFoot(P);
+    }}, left + " left \u25BE"));
+    if(blocked >= 2) foot.appendChild(h("button", {cls:"bb skip", onclick:function(){ blocked = 0; if(last) go("results"); else openPart(S.p + 1); }}, "Skip this page for now"));
+  } else {
+    foot.appendChild(h("button", {cls:"bb go", onclick:function(){ if(last) go("results"); else openPart(S.p + 1); }}, last ? "Results \u2605" : "Next: " + PARTS[S.p + 1].id + " \u25B6"));
+  }
+}
+var pillEl = null;
+function updatePill(P){
+  var root = document.getElementById("pillRoot"); root.innerHTML = ""; pillEl = null;
+  if(!P || P.type === "sim") return;
+  var left = remaining(P); if(!left) return;
+  pillEl = h("button", {cls:"pill", onclick:function(){ var el = firstUnanswered(P); if(el){ el.scrollIntoView({behavior:REDUCED ? "auto" : "smooth", block:"center"}); el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash"); } }},
+    left + " left. Take me there \u25BE");
+  root.appendChild(pillEl); pillCheck();
+}
+function pillCheck(){
+  if(!pillEl || S.v !== "part") return;
+  var el = firstUnanswered(PARTS[S.p]); if(!el){ pillEl.style.display = "none"; return; }
+  var r = el.getBoundingClientRect(), m = main.getBoundingClientRect();
+  pillEl.style.display = (r.bottom > m.top && r.top < m.bottom) ? "none" : "";
+}
+main.addEventListener("scroll", pillCheck);
+
+function stars(pct){ return pct >= 90 ? 5 : pct >= 75 ? 4 : pct >= 60 ? 3 : pct >= 40 ? 2 : 1; }
+function renderResults(){
+  document.body.className = "g2"; setAddr("results");
+  var w = wrap, t = totals(), pct = Math.round(t.r / TOTAL * 100), s = stars(pct);
+  var bands = ["", "Keep going. Try each part again. Ask your teacher for help.", "You are getting there. Go over your mistakes with a partner.",
+    "Good work. Go over your mistakes. Then try those parts again.", "Great work! Look at your mistakes, then try them again.", "Excellent! You are ready to find it online."];
+  w.appendChild(sbar("\u2605", "My results"));
+  w.appendChild(h("div", {cls:"card", style:"border-bottom-color:#F5A20F"}, [h("div", {cls:"score"}, t.r + " / " + TOTAL),
+    h("div", {cls:"stars", "aria-label":s + " stars out of 5"}, "\u2605\u2605\u2605\u2605\u2605".slice(0, s) + "\u2606\u2606\u2606\u2606\u2606".slice(0, 5 - s)),
+    h("p", {cls:"center", style:"font-weight:700"}, bands[s]),
+    t.a < TOTAL ? h("p", {cls:"center muted"}, "You answered " + t.a + " of " + TOTAL + ". Finish the other parts for a full score.") : null]));
+  var nm = mistakes().length;
+  w.appendChild(h("button", {cls:"bb go", style:"width:100%;margin:.3em 0", onclick:function(){ go("review"); }}, nm ? "Go over my mistakes (" + nm + ")" : "No mistakes! \uD83C\uDF89"));
+  w.appendChild(h("div", {cls:"grouphead"}, "Each part"));
+  for(var i = 0; i < PARTS.length; i++){
+    (function(i){ var P = PARTS[i], g = colOf(P);
+      w.appendChild(h("button", {cls:"rrow", onclick:function(){ openPart(i); }}, [h("span", {cls:"l", style:"background:" + g.c + ";color:" + g.ink}, P.id),
+        h("span", {cls:"t"}, P.title), h("span", {cls:"s"}, rightN(P) + " / " + scored(P).length)])); })(i);
+  }
+  foot.innerHTML = "";
+  foot.appendChild(h("button", {cls:"bb", onclick:function(){ go("menu"); }}, "\u2630 Menu"));
+  foot.appendChild(h("button", {cls:"bb go", onclick:function(){ go("review"); }, disabled:nm ? null : "disabled"}, "My mistakes"));
+}
+function mistakes(){
+  var list = [];
+  for(var i = 0; i < PARTS.length; i++){
+    var P = PARTS[i];
+    if(P.type === "sim"){ var seq = taskSeq(P);
+      for(var s = 0; s < seq.length; s++){ var ti = seq[s], a = S.ans[P.id + "t" + ti]; if(a && !a.ok){ var T = P.tasks[ti];
+        list.push({P:P, pi:i, q:T.t, you:a.pick, right:T.type === "type" ? "www.cammeraygreenpool.com.au" : rightLabel(P, T), why:T.why, sim:true}); } } }
+    else { var ord = itemOrder(P);
+      for(var j = 0; j < ord.length; j++){ var it = P.items[ord[j]]; if(it.k === "page") continue; var b = S.ans[it.id];
+        if(b && !b.ok) list.push({P:P, pi:i, key:it.id, q:(it.show ? it.show + "  " : "") + (it.sayw ? "Where is the strong part? " + it.q : it.q), you:b.pick, right:it.opts[correctIdx(it)], why:it.why}); } }
+  }
+  return list;
+}
+var TARGETNAMES = {menu:"the menu bar", refresh:"the refresh button", find:"the Find a class button", x1:"the x on the tab", x2:"the x on the tab", addr:"the address bar",
+  scroll:"the scroll bar", plus:"the plus", search:"the search box for this site", cursor:"the cursor", tab1:"the white tab (The Cove Hub)", logo:"the logo", back:"the back arrow",
+  sponsored:"the word Sponsored", images:"Images", newst:"New garden opens at Waverton hub", coveurl:"www.thecovehub.org.au", covet:"The Cove Hub title",
+  cl:"Community life", lc:"Library corner", dig:"Digital help sessions", home:"Home", browser:"the browser icon", enter:"the Enter key", lessons:"Lessons"};
+function rightLabel(P, T){
+  var t = T.target instanceof Array ? T.target[0] : T.target;
+  if(P.sim === "desktop") return ICONLABEL[t];
+  return TARGETNAMES[t] || t;
+}
+function renderReview(){
+  document.body.className = "g2"; setAddr("my-mistakes");
+  var w = wrap, list = mistakes();
+  w.appendChild(sbar("\u2717", "Go over my mistakes"));
+  if(!list.length) w.appendChild(note("ok", "\u2713", h("p", null, "No mistakes to go over. Well done!")));
+  else w.appendChild(h("p", {cls:"lede"}, "Read each one. Then try it again."));
+  var lastP = null;
+  for(var i = 0; i < list.length; i++){
+    (function(m){
+      if(m.P !== lastP){ w.appendChild(h("div", {cls:"grouphead"}, [h("span", {cls:"sw", style:"background:" + colOf(m.P).c}), "Part " + m.P.id + ": " + m.P.title])); lastP = m.P; }
+      w.appendChild(h("div", {cls:"card no mist"}, [h("div", {cls:"q"}, m.q),
+        h("div", null, ["You chose: ", h("span", {cls:"you"}, m.you)]),
+        h("div", null, ["Right answer: ", h("span", {cls:"right"}, m.right)]),
+        h("div", {cls:"fb"}, m.why),
+        h("button", {cls:"chg", onclick:function(){
+          if(m.sim){ resetPart(m.P); openPart(m.pi); }
+          else { delete S.ans[m.key]; save(true); openPart(m.pi, m.key); }
+        }}, m.sim ? "\u21BB Do this part again" : "\u21BA Try it again")]));
+    })(list[i]);
+  }
+  foot.innerHTML = "";
+  foot.appendChild(h("button", {cls:"bb", onclick:function(){ go("results"); }}, "\u25C0 My results"));
+  foot.appendChild(h("button", {cls:"bb go", onclick:function(){ go("menu"); }}, "\u2630 Menu"));
+}
+
+/* ===================== ROUTER ===================== */
+function renderTop(){ document.body.removeAttribute("style"); document.documentElement.style.fontSize = SIZES[S.size] + "px"; wrap.innerHTML = ""; document.getElementById("pillRoot").innerHTML = ""; pillEl = null;
+  if(S.v === "part") renderPart(); else if(S.v === "results") renderResults(); else if(S.v === "review") renderReview(); else renderMenu();
+  setProg(); FLASH = null; }
+function renderKeep(){ var y = main.scrollTop; renderTop(); main.scrollTop = y; pillCheck(); }
+function go(v){ S.v = v; blocked = 0; save(); renderTop(); main.scrollTop = 0; }
+function openPart(i, focusKey){
+  S.v = "part"; S.p = i; S.last = PARTS[i].id; blocked = 0; save(); renderTop(); main.scrollTop = 0;
+  if(focusKey) setTimeout(function(){ flashCard(focusKey); }, 60);
+}
+document.getElementById("bMenu").onclick = function(){ go("menu"); };
+document.getElementById("bSmall").onclick = function(){ if(S.size > 0){ S.size--; save(); renderKeep(); } };
+document.getElementById("bBig").onclick = function(){ if(S.size < SIZES.length - 1){ S.size++; save(); renderKeep(); } };
+document.addEventListener("keydown", function(e){ if(e.key === "Escape") go("menu"); });
+window.addEventListener("pagehide", function(){ save(); });
+document.addEventListener("visibilitychange", function(){ if(document.visibilityState === "hidden") save(); });
+
+load();
+if(S.v === "review" || S.v === "results" || S.v === "part" || S.v === "menu"){} else S.v = "menu";
+renderTop();
+})();
+</script>
+</body>
+</html>
